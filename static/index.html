@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" /> <!--skip-->
+        <title>Eleanor Rigby</title>
+        <link rel="stylesheet" type="text/css" href="/easyrtc/easyrtc.css" />
+
+        <!--hide-->
+        <link rel="stylesheet" type="text/css" href="css/landing.css" />
+        <link rel="stylesheet" type="text/css" href="css/demo_audio_video_simple.css" />
+
+        <!--show-->
+        <!-- Assumes global locations for socket.io.js and easyrtc.js -->
+        <script src="/socket.io/socket.io.js"></script>
+        <script type="text/javascript" src="/easyrtc/easyrtc.js"></script>
+        <script type="text/javascript" src="js/demo_audio_video_simple.js"></script>
+
+        <!-- Latest compiled and minified CSS -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    </head>
+    <body onload="connect();">
+        <!--hide-->
+        <div id="container">
+            <div id="main">
+                <!-- Main Content -->
+                <h1>Eleanor Rigby: Because you're sad and alone.</h1>
+
+                <h2>The Demo</h2>
+                <!--show-->
+                <div id="demoContainer">
+                    <div id="connectControls">
+                        <div id="iam">Not yet connected...</div>
+                        <br />
+                        <strong>Connected users:</strong>
+                        <div id="otherClients"></div>
+                    </div>
+                    <div id="videos">
+                        <video autoplay="autoplay" class="easyrtcMirror" id="selfVideo" muted="muted" volume="0" ></video>
+                        <div style="position:relative;float:left;">
+                        <video autoplay="autoplay" id="callerVideo"></video>
+                        </div>
+                        <!-- each caller video needs to be in it's own div so it's close button can be positioned correctly -->
+                    </div>
+                </div>
+                <!--hide-->
+                <br style="clear:both;" />
+                <hr />
+
+                <div class="form-group">
+                    <label for="usr">Name:</label>
+                    <input type="text" class="form-control" id="usr" onkeydown="if(event.keyCode == 13){changeName();}">
+                    I am a
+                    <label class="radio-inline"><input type="radio" name="optradio">Man</label>
+                    <label class="radio-inline"><input type="radio" name="optradio">Woman</label>
+                    <label class="radio-inline"><input type="radio" name="optradio">Nonbinary</label>
+
+                    <br/>
+                    
+                    Seeking
+                    <label class="checkbox-inline"><input type="checkbox" value="">Man</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="">Woman</label>
+                    <label class="checkbox-inline"><input type="checkbox" value="">Nonbinary</label>
+                </div>
+
+                <!-- End Main Content -->
+            </div>
+        </div>
+        <!--show-->
+    </body>
+</html>

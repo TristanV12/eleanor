@@ -1,0 +1,57 @@
+/*
+    General CSS for easyrtc local landing site.
+    Only general layout is here.
+    Any CSS related directly to the operation of a demo is kept in another file.
+*/
+
+body {
+    background: #2F4F4F;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+#container {
+    width:960px;
+    margin-left: auto;
+    margin-right:auto;
+
+    background-image:url("../images/bg_dark.png");
+    background-color:black;
+}
+
+
+
+#main {
+    background-color:white;
+    overflow:hidden;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+
+.demo_table {
+    border-collapse:collapse;
+    border:1px solid gray;
+}
+.demo_table  th{
+    padding:3px;
+    text-align:left;
+}
+.demo_table  td{
+    border-top:1px solid gray;
+    padding:3px;
+}
+.demo_table  #browser_note{
+    text-align:center;
+    font-size: smaller;
+    color: gray;
+}
+
+hr {
+    clear:both;
+}
+
+.prettyprint {
+     white-space: pre-wrap;
+     max-height:400px;
+     overflow-y:scroll;
+}
