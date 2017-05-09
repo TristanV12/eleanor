@@ -1,16 +1,25 @@
-var express     = require('express'),
-	https       = require("https"),
-	easyrtc     = require("easyrtc"),
-	serveStatic = require('serve-static'),
-	socketIo    = require("socket.io"),
-	fs          = require("fs");
+var express          = require('express'),
+	https            = require("https"),
+	easyrtc          = require("easyrtc"),
+	serveStatic      = require('serve-static'),
+	socketIo         = require("socket.io"),
+	fs               = require("fs"),
+    path             = require("path"),
+    bodyParser       = require('body-parser'),
+    mongoose         = require('mongoose'),
+    User             = require('./userAuth');
+
+mongoose.connect('mongodb://localhost/eleanor');
 
 // Set process name
 process.title = "Eleanor Rigby";
 
 // Setup and configure Express http server. Expect a subfolder called "static" to be the web root.
 var httpApp = express();
-httpApp.use(serveStatic('static', {'index': ['index.html']}));
+httpApp.use(serveStatic('static', {'index': ['index.html'], 'chat': ['video.html']}));
+
+httpApp.use(bodyParser.json()); // support json encoded bodies
+httpApp.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
 
 // Start Express https server on port 8443
 var webServer = https.createServer(
@@ -23,7 +32,29 @@ httpApp).listen(8080);
 // Start Socket.io so it attaches itself to Express server
 var socketServer = socketIo.listen(webServer, {"log level":1});
 
-easyrtc.setOption("logLevel", "debug");
+//easyrtc.setOption("logLevel", "debug");
+
+httpApp.post('/chat', function(req, res){
+    User.findOne({ username: req.body.usr }, function(err, user) {
+        if (err){
+            res.redirect('/');
+        }
+
+        user.comparePassword(req.body.password, function(err, isMatch) {
+            if (err) throw err;
+            console.log('Password123:', isMatch); // -&gt; Password123: true
+        });
+    });
+    console.log(req.body.usr);
+    console.log(req.body.gender);
+    console.log(req.body.seeking);
+    console.log(req.body.seeking.length);
+    res.sendFile(path.join(__dirname + '/static/video.html'));
+});
+
+httpApp.get('/chat', function(req, res){
+    res.redirect('/');
+});
 
 // Overriding the default easyrtcAuth listener, only so we can directly access its callback
 easyrtc.events.on("easyrtcAuth", function(socket, easyrtcid, msg, socketCallback, callback) {
