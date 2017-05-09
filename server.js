@@ -1,13 +1,14 @@
-var express          = require('express'),
-	https            = require("https"),
-	easyrtc          = require("easyrtc"),
-	serveStatic      = require('serve-static'),
-	socketIo         = require("socket.io"),
-	fs               = require("fs"),
-    path             = require("path"),
-    bodyParser       = require('body-parser'),
-    mongoose         = require('mongoose'),
-    User             = require('./userAuth');
+var express     = require('express'),
+	https       = require("https"),
+	easyrtc     = require("easyrtc"),
+	serveStatic = require('serve-static'),
+	socketIo    = require("socket.io"),
+	fs          = require("fs"),
+    path        = require("path"),
+    bodyParser  = require('body-parser'),
+    mongoose    = require('mongoose'),
+    User        = require('./userAuth'),
+    session     = require('client-sessions');
 
 mongoose.connect('mongodb://localhost/eleanor');
 
@@ -20,6 +21,13 @@ httpApp.use(serveStatic('static', {'index': ['index.html'], 'chat': ['video.html
 
 httpApp.use(bodyParser.json()); // support json encoded bodies
 httpApp.use(bodyParser.urlencoded({ extended: true })); // support encoded bodies
+
+httpApp.use(session({
+  cookieName: 'session',
+  secret: 'random_string_goes_here',
+  duration: 30 * 60 * 1000,
+  activeDuration: 5 * 60 * 1000,
+}));
 
 // Start Express https server on port 8443
 var webServer = https.createServer(
@@ -34,7 +42,52 @@ var socketServer = socketIo.listen(webServer, {"log level":1});
 
 //easyrtc.setOption("logLevel", "debug");
 
-httpApp.post('/chat', function(req, res){
+httpApp.post('/signUp', function(req, res){
+    User.findOne({ username: req.body.usr }, function(err, user) {
+        if (user == null && typeof req.body.seeking !== 'undefined'){
+            var gender;
+            var men = req.body.seeking == "seek-men";
+            var women = req.body.seeking == "seek-women";
+            var nonbinary = req.body.seeking == "seek-non";
+            for (var itr = 0; itr < req.body.seeking.length; itr++) {
+                if(req.body.seeking[i] == "seek-men"){ men = true; }
+                if(req.body.seeking[i] == "seek-women"){ women = true; }
+                if(req.body.seeking[i] == "seek-non"){ nonbinary = true; }
+            };
+            if(req.body.gender == "male"){ gender = 0; }
+            if(req.body.gender == "female"){ gender = 1; }
+            if(req.body.gender == "non"){ gender = 2; }
+
+            var new_user = new User({
+                username: req.body.usr,
+                password: req.body.password,
+                gender: gender,
+                men: men,
+                women: women,
+                nonbinary: nonbinary
+            });
+            new_user.save(function(err) {
+                if (err) throw err;
+            });
+            req.session.user = new_user;
+            res.redirect('/chat');
+        }else{
+            user.comparePassword(req.body.password, function(err, isMatch) {
+                if (err) throw err;
+
+                if (isMatch){
+                    req.session.user = user;
+                    res.redirect('/chat');
+                }
+                else{
+                    res.redirect('/');
+                }
+            });
+        }
+    });
+});
+
+httpApp.post('/signIn', function(req, res){
     User.findOne({ username: req.body.usr }, function(err, user) {
         if (err){
             res.redirect('/');
@@ -42,18 +95,24 @@ httpApp.post('/chat', function(req, res){
 
         user.comparePassword(req.body.password, function(err, isMatch) {
             if (err) throw err;
-            console.log('Password123:', isMatch); // -&gt; Password123: true
+
+            if (isMatch){
+                req.session.user = user;
+                res.redirect('/chat');
+            }
+            else{
+                res.redirect('/');
+            }
         });
     });
-    console.log(req.body.usr);
-    console.log(req.body.gender);
-    console.log(req.body.seeking);
-    console.log(req.body.seeking.length);
-    res.sendFile(path.join(__dirname + '/static/video.html'));
 });
 
 httpApp.get('/chat', function(req, res){
-    res.redirect('/');
+    if(typeof req.session.user !== 'undefined'){
+        res.sendFile(path.join(__dirname + '/static/video.html'));
+    }else{
+        res.redirect('/');
+    }
 });
 
 // Overriding the default easyrtcAuth listener, only so we can directly access its callback

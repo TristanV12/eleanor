@@ -5,7 +5,11 @@ var mongoose = require('mongoose'),
 
 var UserSchema = new Schema({
     username: { type: String, required: true, index: { unique: true } },
-    password: { type: String, required: true }
+    password: { type: String, required: true },
+    gender: { type: Number, required: true },
+    men: {type: Boolean},
+    women: {type: Boolean},
+    nonbinary: {type: Boolean},
 });
 
 UserSchema.pre('save', function(next) {
@@ -22,6 +26,8 @@ bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
     bcrypt.hash(user.password, salt, function(err, hash) {
         if (err) return next(err);
 
+        console.log(hash);
+
         // override the cleartext password with the hashed one
         user.password = hash;
         next();
@@ -33,6 +39,7 @@ bcrypt.genSalt(SALT_WORK_FACTOR, function(err, salt) {
 
 UserSchema.methods.comparePassword = function(candidatePassword, cb) {
     bcrypt.compare(candidatePassword, this.password, function(err, isMatch) {
+    	console.log("this.password ".concat(this.password));
         if (err) return cb(err);
         cb(null, isMatch);
     });
